@@ -16,17 +16,21 @@ import java.util.Random;
  * Created by zhaowei on 2016/11/10.
  */
 
-public class CardLayoutManager extends RecyclerView.LayoutManager implements RecyclerView.SmoothScroller.ScrollVectorProvider {
+public class CardLayoutManager extends RecyclerView.LayoutManager implements RecyclerView.SmoothScroller.ScrollVectorProvider, OnAnimationListener {
 
     private static final int NO_TARGET_POSITION = -1;
     private static final int COUNT = 4;
     private static final int MAX_DEGREE = 27;
     private static final float SCALE_INTERVAL = 0.05f;
+    private static final int NO_ANIMATION = 0;
+    private static final int ANIMATION_OUT = 1;
+    private static final int ANIMATION_IN = 2;
 
     private int mStartPosition = 0;
     private int mTargetPosition = NO_TARGET_POSITION;
-    private int mHorizontally = 0;
-    private int mVertically = 0;
+    private int mDx = 0;
+    private int mDy = 0;
+    private boolean mIsSwipe;
     private float mTouchProportion;
     private SparseArray<View> mCacheViews = new SparseArray<>();
     private boolean mIsScrollEnabled = true;
@@ -35,6 +39,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     private int mMinDistance;
     private CardSwipeController mCardSwipeController;
     private OnCardSwipeListener mOnCardSwipeListener;
+    private int mAnimStatus = NO_ANIMATION;
 
 
     public void setOnCardSwipeListener(OnCardSwipeListener onCardSwipeListener) {
@@ -53,14 +58,11 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
             detachAndScrapAttachedViews(recycler);
             return;
         }
-
         if (getChildCount() == 0 && state.isPreLayout()) {
             detachAndScrapAttachedViews(recycler);
             return;
         }
-//        if (!mIsAmination) {
         fill(recycler);
-//        }
     }
 
     private void fill(RecyclerView.Recycler recycler) {
@@ -100,13 +102,16 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
             }
 
             if (i == mStartPosition) {
-                ViewCompat.setTranslationX(child, -mHorizontally);
-                ViewCompat.setTranslationY(child, -mVertically);
+                ViewCompat.setTranslationX(child, mDx);
+                ViewCompat.setTranslationY(child, mDy);
                 ViewCompat.setRotation(child, getRotation());
                 ViewCompat.setScaleX(child, 1);
                 ViewCompat.setScaleY(child, 1);
                 mMinDistance = getMinDistance();
                 proportion = getProportion(child);
+                if (mOnCardSwipeListener != null && mIsSwipe) {
+                    mOnCardSwipeListener.onSwipe(child, mStartPosition, mDx, mDy);
+                }
             } else {
                 int number = i - mStartPosition;
                 if (i == mStartPosition + COUNT - 1) {
@@ -134,9 +139,9 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
 
     private float getRotation() {
         if (mOrientation == LinearLayout.HORIZONTAL) {
-            return MAX_DEGREE * mHorizontally / getWidth() * mTouchProportion;
+            return MAX_DEGREE * mDx / getWidth() * mTouchProportion;
         } else {
-            return -MAX_DEGREE * mVertically / getHeight() * mTouchProportion;
+            return MAX_DEGREE * mDy / getHeight() * mTouchProportion;
         }
     }
 
@@ -151,9 +156,9 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     private float getProportion(View view) {
         float proportion;
         if (mOrientation == LinearLayout.HORIZONTAL) {
-            proportion = Math.abs(mHorizontally) / (view.getWidth() / 2.0f);
+            proportion = Math.abs(mDx) / (view.getWidth() / 2.0f);
         } else {
-            proportion = Math.abs(mVertically) / (view.getHeight() / 2.0f);
+            proportion = Math.abs(mDy) / (view.getHeight() / 2.0f);
         }
         return Math.min(proportion, 1);
     }
@@ -189,7 +194,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
         if (mIsScrollEnabled) {
-            mVertically += dy;
+            mDy -= dy;
             fill(recycler);
             return dy;
         }
@@ -199,7 +204,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     @Override
     public int scrollHorizontallyBy(int dx, RecyclerView.Recycler recycler, RecyclerView.State state) {
         if (mIsScrollEnabled) {
-            mHorizontally += dx;
+            mDx -= dx;
             fill(recycler);
             return dx;
         }
@@ -221,12 +226,23 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     }
 
     private void findTopView() {
-        if ((mOrientation == LinearLayout.HORIZONTAL && Math.abs(mHorizontally) > mMinDistance) ||
-                (mOrientation == LinearLayout.VERTICAL && Math.abs(mVertically) > mMinDistance)) {
-            mHorizontally = 0;
-            mVertically = 0;
+        if ((mOrientation == LinearLayout.HORIZONTAL && Math.abs(mDx) > mMinDistance) ||
+                (mOrientation == LinearLayout.VERTICAL && Math.abs(mDy) > mMinDistance)) {
+            if (mAnimStatus == ANIMATION_IN) {
+                if (mOnCardSwipeListener != null) {
+                    mOnCardSwipeListener.animationInStop(getViewByPosition(mStartPosition), mStartPosition);
+                }
+            } else if (mAnimStatus == ANIMATION_OUT) {
+                if (mOnCardSwipeListener != null) {
+                    mOnCardSwipeListener.animationOutStop(getViewByPosition(mStartPosition), mStartPosition);
+                }
+            }
+            mAnimStatus = NO_ANIMATION;
+            mDx = 0;
+            mDy = 0;
             mStartPosition++;
             mIsScrollEnabled = false;
+            mIsSwipe = false;
         }
     }
 
@@ -236,16 +252,14 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
 
     void fling(int velocityX, int velocityY) {
         CardSmoothScroller scroller = new CardSmoothScroller();
-        scroller.setTargetPosition(mStartPosition);
-        scroller.setOrientation(mOrientation);
-        scroller.setVelocity(velocityX, velocityY);
+        scroller.prepare(mStartPosition, mOrientation, velocityX, velocityY, this);
         startSmoothScroll(scroller);
     }
 
 
     @Override
     public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
-        if (position != mStartPosition && position < getItemCount()) {
+        if (position != mStartPosition && position <= getItemCount()) {
             if (position > mStartPosition) {
                 smoothScrollNext(position);
             } else {
@@ -258,38 +272,38 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
 
     private void smoothScrollNext(int position) {
         View view = findViewByPosition(mStartPosition);
-        if (view != null) {
-            int top = view.getTop();
-            int left = view.getLeft();
-            Random random = new Random();
-            setDownPoint(view, random.nextInt(view.getWidth()) + left, random.nextInt(view.getHeight()) + top);
-            mTargetPosition = position;
-            CardSmoothScroller scroller = new CardSmoothScroller();
-            scroller.setTargetPosition(mStartPosition);
-            scroller.setOrientation(mOrientation);
-            scroller.scrollNext();
-            startSmoothScroll(scroller);
-        }
+        mIsSwipe = true;
+        int top = view != null ? view.getTop() : 0;
+        int left = view != null ? view.getLeft() : 0;
+        Random random = new Random();
+        setDownPoint(view, random.nextInt(view != null ? view.getWidth() : getWidth()) + left, random.nextInt(view != null ?
+                view.getHeight() : getHeight()) + top);
+        mTargetPosition = position;
+        CardSmoothScroller scroller = new CardSmoothScroller();
+        scroller.setTargetPosition(mStartPosition);
+        scroller.setOrientation(mOrientation);
+        scroller.scrollNext();
+        startSmoothScroll(scroller);
     }
 
     private void smoothScrollPre(int position) {
         View view = findViewByPosition(mStartPosition);
-        if (view != null) {
-            int top = view.getTop();
-            int left = view.getLeft();
-            Random random = new Random();
-            setDownPoint(view, random.nextInt(view.getWidth()) + left, random.nextInt(view.getHeight()) + top);
-            mTargetPosition = position;
-            CardSmoothScroller scroller = new CardSmoothScroller();
-            scroller.setOrientation(mOrientation);
-            CardSwipeModel model = scroller.randomEndPoint(view);
-            mHorizontally = model.getDx();
-            mVertically = model.getDy();
-            mStartPosition -= 1;
-            scroller.setTargetPosition(mStartPosition);
-            scroller.scrollPre();
-            startSmoothScroll(scroller);
-        }
+        mIsSwipe = true;
+        int top = view != null ? view.getTop() : 0;
+        int left = view != null ? view.getLeft() : 0;
+        Random random = new Random();
+        setDownPoint(view, random.nextInt(view != null ? view.getWidth() : getWidth()) + left, random.nextInt(view != null ?
+                view.getHeight() : getHeight()) + top);
+        mTargetPosition = position;
+        CardSmoothScroller scroller = new CardSmoothScroller();
+        scroller.setOrientation(mOrientation);
+        CardSwipeModel model = scroller.randomEndPoint(view, getWidth(), getHeight());
+        mDx = model.getDx();
+        mDy = model.getDy();
+        mStartPosition -= 1;
+        scroller.setTargetPosition(mStartPosition);
+        scroller.scrollPre();
+        startSmoothScroll(scroller);
     }
 
     @Override
@@ -300,17 +314,22 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     }
 
     void setDownPoint(View view, int x, int y) {
-        Rect rect = new Rect();
-        view.getLocalVisibleRect(rect);
-        mIsScrollEnabled = rect.contains(x, y);
+        if (view != null) {
+            Rect rect = new Rect();
+            view.getLocalVisibleRect(rect);
+            mIsScrollEnabled = rect.contains(x, y);
+        } else {
+            mIsScrollEnabled = true;
+        }
         if (mIsScrollEnabled) {
             if (mOrientation == LinearLayout.HORIZONTAL) {
                 float half = getHeight() / 2;
-                mTouchProportion = (y - half - view.getTop()) / half;
+                mTouchProportion = (y - half - (view != null ? view.getTop() : 0)) / half;
             } else {
                 float half = getWidth() / 2;
-                mTouchProportion = (x - half - view.getLeft()) / half;
+                mTouchProportion = (x - half - (view != null ? view.getLeft() : 0)) / half;
             }
+            mIsSwipe = true;
         }
     }
 
@@ -321,5 +340,30 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     @Override
     public PointF computeScrollVectorForPosition(int targetPosition) {
         return null;
+    }
+
+    @Override
+    public void onStartOut() {
+        mAnimStatus = ANIMATION_OUT;
+        mOnCardSwipeListener.animationOutStart(getViewByPosition(mStartPosition), mStartPosition);
+    }
+
+    @Override
+    public void onStartIn() {
+        mAnimStatus = ANIMATION_IN;
+        mOnCardSwipeListener.animationInStart(getViewByPosition(mStartPosition), mStartPosition);
+    }
+
+    @Override
+    public void onStopIn() {
+        mOnCardSwipeListener.animationInStop(getViewByPosition(mStartPosition), mStartPosition);
+    }
+
+    private View getViewByPosition(int position) {
+        View view = findViewByPosition(position);
+        if (view != null) {
+            return view;
+        }
+        return mCacheViews.get(position);
     }
 }

@@ -9,6 +9,10 @@ import android.view.View;
 
 public interface OnCardSwipeListener {
 
-    void onSwipe(View view, int dx, int dy);
+    void onSwipe(View view, int position, int dx, int dy);
+    void animationOutStart(View view, int position);
+    void animationOutStop(View view, int position);
+    void animationInStart(View view, int position);
+    void animationInStop(View view, int position);
 
 }

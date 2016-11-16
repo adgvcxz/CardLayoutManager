@@ -3,8 +3,8 @@ package com.adgvcxz.recycler;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.adgvcxz.cardlayoutmanager.CardItemAnimator;
 import com.adgvcxz.cardlayoutmanager.CardLayoutManager;
 import com.adgvcxz.cardlayoutmanager.CardSnapHelper;
+import com.adgvcxz.cardlayoutmanager.OnCardSwipeListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +46,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 recyclerView.smoothScrollToPosition(layoutManager.getTopPosition() + 2);
+            }
+        });
+        layoutManager.setOnCardSwipeListener(new OnCardSwipeListener() {
+            @Override
+            public void onSwipe(View view, int position, int dx, int dy) {
+//                Log.e("zhaow", "onSwipe" + dx + "    " + dy);
+                view.setAlpha(1 - ((float) Math.abs(dx) / view.getWidth()));
+            }
+
+            @Override
+            public void animationOutStart(View view, int position) {
+                Log.e("zhaow", "动画Out开始" + view + "   " + position);
+            }
+
+            @Override
+            public void animationOutStop(View view, int position) {
+                Log.e("zhaow", "动画OUT结束" + view + "   " + position);
+            }
+
+            @Override
+            public void animationInStart(View view, int position) {
+                Log.e("zhaow", "动画IN开始" + view + "   " + position);
+            }
+
+            @Override
+            public void animationInStop(View view, int position) {
+                Log.e("zhaow", "动画IN结束" + view + "   " + position);
             }
         });
     }
