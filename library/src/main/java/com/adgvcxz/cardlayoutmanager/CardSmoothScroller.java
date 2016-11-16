@@ -122,7 +122,12 @@ public class CardSmoothScroller extends RecyclerView.SmoothScroller {
 
     CardSwipeModel calculateEndPoint(View view) {
         ViewGroup layout = (ViewGroup) view.getParent();
-        int direction = view.getTranslationX() > 0 ? CardSwipeModel.DIRECTION_START : CardSwipeModel.DIRECTION_END;
+        int direction;
+        if (mOrientation == LinearLayout.HORIZONTAL) {
+            direction = view.getTranslationX() > 0 ? CardSwipeModel.DIRECTION_START : CardSwipeModel.DIRECTION_END;
+        } else {
+            direction = view.getTranslationY() > 0 ? CardSwipeModel.DIRECTION_START : CardSwipeModel.DIRECTION_END;
+        }
         float slope = view.getTranslationY() / view.getTranslationX();
         int distanceX;
         int distanceY;
@@ -159,10 +164,7 @@ public class CardSmoothScroller extends RecyclerView.SmoothScroller {
         int y = (int) targetView.getTranslationY();
         int width = targetView.getWidth();
         int height = targetView.getHeight();
-        if (x != 0 || y != 0) {
-            boolean isOverBounds = mOrientation == LinearLayout.HORIZONTAL ? Math.abs(x) >= width / 2 : Math.abs(y) >= height / 2;
-            return isOverBounds || exceed(targetView.getContext());
-        }
-        return false;
+        boolean isOverBounds = mOrientation == LinearLayout.HORIZONTAL ? Math.abs(x) >= width / 2 : Math.abs(y) >= height / 2;
+        return isOverBounds || exceed(targetView.getContext());
     }
 }

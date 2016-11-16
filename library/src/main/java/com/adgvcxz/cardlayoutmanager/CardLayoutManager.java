@@ -31,9 +31,15 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     private SparseArray<View> mCacheViews = new SparseArray<>();
     private boolean mIsScrollEnabled = true;
     private RecyclerView.Recycler mRecycler;
-    private int mOrientation = LinearLayout.HORIZONTAL;
+    private int mOrientation = LinearLayout.VERTICAL;
     private int mMinDistance;
     private CardSwipeController mCardSwipeController;
+    private OnCardSwipeListener mOnCardSwipeListener;
+
+
+    public void setOnCardSwipeListener(OnCardSwipeListener onCardSwipeListener) {
+        mOnCardSwipeListener = onCardSwipeListener;
+    }
 
     @Override
     public RecyclerView.LayoutParams generateDefaultLayoutParams() {
@@ -64,11 +70,8 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
             detachView(mCacheViews.valueAt(i));
         }
 
-        if ((mTargetPosition == NO_TARGET_POSITION || mTargetPosition > mStartPosition) && Math.abs(mHorizontally) > mMinDistance) {
-            mHorizontally = 0;
-            mVertically = 0;
-            mStartPosition++;
-            mIsScrollEnabled = false;
+        if ((mTargetPosition == NO_TARGET_POSITION || mTargetPosition > mStartPosition)) {
+            findTopView();
         }
 
         float proportion = 1;
@@ -217,6 +220,16 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
                 + params.bottomMargin;
     }
 
+    private void findTopView() {
+        if ((mOrientation == LinearLayout.HORIZONTAL && Math.abs(mHorizontally) > mMinDistance) ||
+                (mOrientation == LinearLayout.VERTICAL && Math.abs(mVertically) > mMinDistance)) {
+            mHorizontally = 0;
+            mVertically = 0;
+            mStartPosition++;
+            mIsScrollEnabled = false;
+        }
+    }
+
     public int getStartPosition() {
         return mStartPosition;
     }
@@ -224,6 +237,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     void fling(int velocityX, int velocityY) {
         CardSmoothScroller scroller = new CardSmoothScroller();
         scroller.setTargetPosition(mStartPosition);
+        scroller.setOrientation(mOrientation);
         scroller.setVelocity(velocityX, velocityY);
         startSmoothScroll(scroller);
     }
@@ -267,12 +281,12 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
             setDownPoint(view, random.nextInt(view.getWidth()) + left, random.nextInt(view.getHeight()) + top);
             mTargetPosition = position;
             CardSmoothScroller scroller = new CardSmoothScroller();
+            scroller.setOrientation(mOrientation);
             CardSwipeModel model = scroller.randomEndPoint(view);
             mHorizontally = model.getDx();
             mVertically = model.getDy();
             mStartPosition -= 1;
             scroller.setTargetPosition(mStartPosition);
-            scroller.setOrientation(mOrientation);
             scroller.scrollPre();
             startSmoothScroll(scroller);
         }
@@ -286,12 +300,17 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     }
 
     void setDownPoint(View view, int x, int y) {
-        float half = getHeight() / 2;
         Rect rect = new Rect();
         view.getLocalVisibleRect(rect);
         mIsScrollEnabled = rect.contains(x, y);
         if (mIsScrollEnabled) {
-            mTouchProportion = (y - half - view.getTop()) / half;
+            if (mOrientation == LinearLayout.HORIZONTAL) {
+                float half = getHeight() / 2;
+                mTouchProportion = (y - half - view.getTop()) / half;
+            } else {
+                float half = getWidth() / 2;
+                mTouchProportion = (x - half - view.getLeft()) / half;
+            }
         }
     }
 
