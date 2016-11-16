@@ -56,22 +56,22 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void animationOutStart(View view, int position) {
+            public void onAnimOutStart(View view, int position, int direction) {
                 Log.e("zhaow", "动画Out开始" + view + "   " + position);
             }
 
             @Override
-            public void animationOutStop(View view, int position) {
+            public void onAnimOutStop(View view, int position, int direction) {
                 Log.e("zhaow", "动画OUT结束" + view + "   " + position);
             }
 
             @Override
-            public void animationInStart(View view, int position) {
+            public void onAnimInStart(View view, int position) {
                 Log.e("zhaow", "动画IN开始" + view + "   " + position);
             }
 
             @Override
-            public void animationInStop(View view, int position) {
+            public void onAnimInStop(View view, int position) {
                 Log.e("zhaow", "动画IN结束" + view + "   " + position);
             }
         });

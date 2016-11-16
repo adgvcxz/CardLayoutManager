@@ -14,6 +14,9 @@ import android.widget.LinearLayout;
 
 import java.util.Random;
 
+import static com.adgvcxz.cardlayoutmanager.CardLayoutManager.DIRECTION_END;
+import static com.adgvcxz.cardlayoutmanager.CardLayoutManager.DIRECTION_START;
+
 /**
  * zhaowei
  * Created by zhaowei on 2016/11/10.
@@ -32,6 +35,8 @@ public class CardSmoothScroller extends RecyclerView.SmoothScroller {
     private CardSwipeModel mCardSwipeModel;
     private int mMinVelocity;
     private OnAnimationListener mOnAnimationListener;
+
+
 
 
     @Override
@@ -56,12 +61,14 @@ public class CardSmoothScroller extends RecyclerView.SmoothScroller {
         if (mScrollToPosition == SCROLL_NEXT) {
             View parent = (View) targetView.getParent();
             CardSwipeModel model = randomEndPoint(targetView, parent.getWidth(), parent.getHeight());
-            updateAction(action, model.getDx(), model.getDy(), model.getDuration(), true, new AnticipateOvershootInterpolator());
+            updateAction(action, model.getDx(), model.getDy(), model.getDuration(), true
+                    , model.getDirection(), new AnticipateOvershootInterpolator());
             return;
         }
 
         if (mScrollToPosition == SCROLL_PRE) {
-            updateAction(action, (int) targetView.getTranslationX(), (int) targetView.getTranslationY(), mCardSwipeModel.getDuration(), false, new OvershootInterpolator());
+            updateAction(action, (int) targetView.getTranslationX(), (int) targetView.getTranslationY()
+                    , mCardSwipeModel.getDuration(), false, mCardSwipeModel.getDirection(), new OvershootInterpolator());
             return;
         }
 
@@ -70,9 +77,9 @@ public class CardSmoothScroller extends RecyclerView.SmoothScroller {
         if (x != 0 || y != 0) {
             if (canSwipeOut(targetView)) {
                 CardSwipeModel model = calculateEndPoint(targetView);
-                updateAction(action, model.getDx(), model.getDy(), model.getDuration(), true, new DecelerateInterpolator());
+                updateAction(action, model.getDx(), model.getDy(), model.getDuration(), true, model.getDirection(), new DecelerateInterpolator());
             } else {
-                updateAction(action, x, y, (int) Math.max(calculateDistanceToZero(x, y) * 0.7, 350), false, new OvershootInterpolator());
+                updateAction(action, x, y, (int) Math.max(calculateDistanceToZero(x, y) * 0.7, 350), false, DIRECTION_START, new OvershootInterpolator());
                 if (mOnAnimationListener != null) {
                     targetView.postDelayed(new Runnable() {
                         @Override
@@ -103,7 +110,7 @@ public class CardSmoothScroller extends RecyclerView.SmoothScroller {
 
     CardSwipeModel randomEndPoint(View view, int pWidth, int pHeight) {
         Random random = new Random();
-        int direction = random.nextInt(CardSwipeModel.DIRECTION_END) + CardSwipeModel.DIRECTION_START;
+        int direction = random.nextInt(DIRECTION_END) + DIRECTION_START;
         int distanceX;
         int distanceY;
         int left = 0;
@@ -117,12 +124,12 @@ public class CardSmoothScroller extends RecyclerView.SmoothScroller {
             translationY = (int) view.getTranslationY();
         }
         if (mOrientation == LinearLayout.HORIZONTAL) {
-            int cnt = direction == CardSwipeModel.DIRECTION_START ? -translationX : translationX;
+            int cnt = direction == DIRECTION_START ? -translationX : translationX;
             int startMinDistance = pWidth - left - cnt;
             distanceX = (int) (startMinDistance + pWidth * Math.random());
             distanceY = random.nextInt(pHeight / 2) * (random.nextBoolean() ? 1 : -1);
         } else {
-            int cnt = direction == CardSwipeModel.DIRECTION_START ? -translationY : translationY;
+            int cnt = direction == DIRECTION_START ? -translationY : translationY;
             int startMinDistance = pHeight - top - cnt;
             distanceY = (int) (startMinDistance + pHeight * Math.random());
             distanceX = random.nextInt(pWidth / 2) * (random.nextBoolean() ? 1 : -1);
@@ -136,20 +143,20 @@ public class CardSmoothScroller extends RecyclerView.SmoothScroller {
         ViewGroup layout = (ViewGroup) view.getParent();
         int direction;
         if (mOrientation == LinearLayout.HORIZONTAL) {
-            direction = view.getTranslationX() > 0 ? CardSwipeModel.DIRECTION_START : CardSwipeModel.DIRECTION_END;
+            direction = view.getTranslationX() > 0 ? DIRECTION_START : DIRECTION_END;
         } else {
-            direction = view.getTranslationY() > 0 ? CardSwipeModel.DIRECTION_START : CardSwipeModel.DIRECTION_END;
+            direction = view.getTranslationY() > 0 ? DIRECTION_START : DIRECTION_END;
         }
         float slope = view.getTranslationY() / view.getTranslationX();
         int distanceX;
         int distanceY;
         if (mOrientation == LinearLayout.HORIZONTAL) {
-            int cnt = (int) (direction == CardSwipeModel.DIRECTION_START ? -view.getTranslationX() : view.getTranslationX());
+            int cnt = (int) (direction == DIRECTION_START ? -view.getTranslationX() : view.getTranslationX());
             int startMinDistance = layout.getWidth() - view.getLeft() - cnt;
             distanceX = (int) (startMinDistance + layout.getWidth() * Math.random());
             distanceY = (int) (distanceX * slope);
         } else {
-            int cnt = (int) (direction == CardSwipeModel.DIRECTION_START ? -view.getTranslationY() : view.getTranslationY());
+            int cnt = (int) (direction == DIRECTION_START ? -view.getTranslationY() : view.getTranslationY());
             int startMinDistance = layout.getHeight() - view.getTop() - cnt;
             distanceY = (int) (startMinDistance + layout.getHeight() * Math.random());
             distanceX = (int) (distanceY / slope);
@@ -189,11 +196,11 @@ public class CardSmoothScroller extends RecyclerView.SmoothScroller {
         mOnAnimationListener = onAnimationListener;
     }
 
-    void updateAction(Action action, int dx, int dy, int duration, boolean out, Interpolator interpolator) {
+    void updateAction(Action action, int dx, int dy, int duration, boolean out, int direction, Interpolator interpolator) {
         action.update(dx, dy, duration, interpolator);
         if (mOnAnimationListener != null) {
             if (out) {
-                mOnAnimationListener.onStartOut();
+                mOnAnimationListener.onStartOut(direction);
             } else {
                 mOnAnimationListener.onStartIn();
             }

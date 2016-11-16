@@ -1,14 +1,13 @@
 package com.adgvcxz.cardlayoutmanager;
 
+import static com.adgvcxz.cardlayoutmanager.CardLayoutManager.DIRECTION_START;
+
 /**
  * zhaowei
  * Created by zhaowei on 2016/11/15.
  */
 
 public class CardSwipeModel {
-
-    static final int DIRECTION_START = 1;
-    static final int DIRECTION_END = 2;
 
     private int mDirection;
     private int mDistanceX;
@@ -36,5 +35,9 @@ public class CardSwipeModel {
         int distance = (int) Math.sqrt(Math.pow(mDistanceX, 2) + Math.pow(mDistanceY, 2));
         int min = (int) (distance / mDensity);
         return Math.max(350, min);
+    }
+
+    public int getDirection() {
+        return mDirection;
     }
 }

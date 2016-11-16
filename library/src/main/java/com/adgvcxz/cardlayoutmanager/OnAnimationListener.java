@@ -6,7 +6,7 @@ package com.adgvcxz.cardlayoutmanager;
  */
 
 public interface OnAnimationListener {
-    void onStartOut();
+    void onStartOut(int direction);
     void onStartIn();
     void onStopIn();
 }

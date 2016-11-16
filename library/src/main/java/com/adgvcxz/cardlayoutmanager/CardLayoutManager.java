@@ -18,6 +18,9 @@ import java.util.Random;
 
 public class CardLayoutManager extends RecyclerView.LayoutManager implements RecyclerView.SmoothScroller.ScrollVectorProvider, OnAnimationListener {
 
+    public static final int DIRECTION_START = 1;
+    public static final int DIRECTION_END = 2;
+
     private static final int NO_TARGET_POSITION = -1;
     private static final int COUNT = 4;
     private static final int MAX_DEGREE = 27;
@@ -40,6 +43,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     private CardSwipeController mCardSwipeController;
     private OnCardSwipeListener mOnCardSwipeListener;
     private int mAnimStatus = NO_ANIMATION;
+    private int mAnimDirection = DIRECTION_START;
 
 
     public void setOnCardSwipeListener(OnCardSwipeListener onCardSwipeListener) {
@@ -102,11 +106,11 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
             }
 
             if (i == mStartPosition) {
-                ViewCompat.setTranslationX(child, mDx);
-                ViewCompat.setTranslationY(child, mDy);
-                ViewCompat.setRotation(child, getRotation());
-                ViewCompat.setScaleX(child, 1);
-                ViewCompat.setScaleY(child, 1);
+                child.setTranslationX(mDx);
+                child.setTranslationY(mDy);
+                child.setRotation(getRotation());
+                child.setScaleX(1);
+                child.setScaleY(1);
                 mMinDistance = getMinDistance();
                 proportion = getProportion(child);
                 if (mOnCardSwipeListener != null && mIsSwipe) {
@@ -230,11 +234,11 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
                 (mOrientation == LinearLayout.VERTICAL && Math.abs(mDy) > mMinDistance)) {
             if (mAnimStatus == ANIMATION_IN) {
                 if (mOnCardSwipeListener != null) {
-                    mOnCardSwipeListener.animationInStop(getViewByPosition(mStartPosition), mStartPosition);
+                    mOnCardSwipeListener.onAnimInStop(getViewByPosition(mStartPosition), mStartPosition);
                 }
             } else if (mAnimStatus == ANIMATION_OUT) {
                 if (mOnCardSwipeListener != null) {
-                    mOnCardSwipeListener.animationOutStop(getViewByPosition(mStartPosition), mStartPosition);
+                    mOnCardSwipeListener.onAnimOutStop(getViewByPosition(mStartPosition), mStartPosition, mAnimDirection);
                 }
             }
             mAnimStatus = NO_ANIMATION;
@@ -343,20 +347,21 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements Rec
     }
 
     @Override
-    public void onStartOut() {
+    public void onStartOut(int direction) {
         mAnimStatus = ANIMATION_OUT;
-        mOnCardSwipeListener.animationOutStart(getViewByPosition(mStartPosition), mStartPosition);
+        mAnimDirection = direction;
+        mOnCardSwipeListener.onAnimOutStart(getViewByPosition(mStartPosition), mStartPosition, mAnimDirection);
     }
 
     @Override
     public void onStartIn() {
         mAnimStatus = ANIMATION_IN;
-        mOnCardSwipeListener.animationInStart(getViewByPosition(mStartPosition), mStartPosition);
+        mOnCardSwipeListener.onAnimInStart(getViewByPosition(mStartPosition), mStartPosition);
     }
 
     @Override
     public void onStopIn() {
-        mOnCardSwipeListener.animationInStop(getViewByPosition(mStartPosition), mStartPosition);
+        mOnCardSwipeListener.onAnimInStop(getViewByPosition(mStartPosition), mStartPosition);
     }
 
     private View getViewByPosition(int position) {
