@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CardLayoutManager</string>
+    <string name="info">dx: %1$d  dy: %2$d</string>
 </resources>

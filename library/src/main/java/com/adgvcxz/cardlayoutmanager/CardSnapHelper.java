@@ -43,23 +43,26 @@ public class CardSnapHelper extends SnapHelper implements View.OnTouchListener {
         if (layoutManager instanceof CardLayoutManager) {
             mVelocityX = velocityX;
             mVelocityY = velocityY;
-            return ((CardLayoutManager) layoutManager).getStartPosition();
+            return ((CardLayoutManager) layoutManager).getTopPosition();
         }
         return RecyclerView.NO_POSITION;
     }
 
     @Override
     public View findSnapView(RecyclerView.LayoutManager layoutManager) {
-        View view = layoutManager.getChildAt(layoutManager.getChildCount() - 1);
-        if (view != null) {
-            int x = (int) view.getTranslationX();
-            int y = (int) view.getTranslationY();
-            int width = layoutManager.getWidth();
-            int height = layoutManager.getHeight();
-            if (x > width || y > height || (x == 0 && y == 0)) {
-                return null;
+        if (layoutManager instanceof CardLayoutManager) {
+            CardLayoutManager manager = (CardLayoutManager) layoutManager;
+            View view = manager.findViewByPosition(manager.getTopPosition());
+            if (view != null) {
+                int x = (int) view.getTranslationX();
+                int y = (int) view.getTranslationY();
+                int width = layoutManager.getWidth();
+                int height = layoutManager.getHeight();
+                if (x > width || y > height || (x == 0 && y == 0)) {
+                    return null;
+                }
+                return view;
             }
-            return layoutManager.getChildAt(layoutManager.getChildCount() - 1);
         }
         return null;
 

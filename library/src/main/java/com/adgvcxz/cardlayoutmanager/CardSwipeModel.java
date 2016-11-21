@@ -1,6 +1,6 @@
 package com.adgvcxz.cardlayoutmanager;
 
-import static com.adgvcxz.cardlayoutmanager.CardLayoutManager.DIRECTION_START;
+import android.view.animation.Interpolator;
 
 /**
  * zhaowei
@@ -9,35 +9,78 @@ import static com.adgvcxz.cardlayoutmanager.CardLayoutManager.DIRECTION_START;
 
 public class CardSwipeModel {
 
+    /**
+     * 滑出的方向  DIRECTION_START 或者 DIRECTION_END
+     */
     private int mDirection;
-    private int mDistanceX;
-    private int mDistanceY;
-    private float mVelocity;
-    private float mDensity;
 
-    CardSwipeModel(int direction, int distanceX, int distanceY, float velocity, float density) {
+    /**
+     * 滑入时的起点x
+     * 滑出时的终点x
+     */
+    private int mX;
+
+    /**
+     * 滑入时的起点y
+     * 滑出时的终点y
+     */
+    private int mY;
+
+    /**
+     * 滑动的时间
+     */
+    private int mDuration;
+
+    /**
+     * 动画的Interpolator
+     */
+    private Interpolator mInterpolator;
+    private int mDx;
+    private int mDy;
+
+
+    public CardSwipeModel(int x, int y, int duration, Interpolator interpolator) {
+        mX = x;
+        mY = y;
+        mDuration = duration;
+        mInterpolator = interpolator;
+    }
+
+    public CardSwipeModel(int x, int y, int duration, Interpolator interpolator, int direction) {
+        mX = x;
+        mY = y;
+        mDuration = duration;
+        mInterpolator = interpolator;
         mDirection = direction;
-        mDistanceX = distanceX;
-        mDistanceY = distanceY;
-        mVelocity = velocity;
-        mDensity = density;
-    }
-
-    int getDx() {
-        return mDirection == DIRECTION_START ? -mDistanceX : mDistanceX;
-    }
-
-    int getDy() {
-        return mDirection == DIRECTION_START ? -mDistanceY : mDistanceY;
     }
 
     int getDuration() {
-        int distance = (int) Math.sqrt(Math.pow(mDistanceX, 2) + Math.pow(mDistanceY, 2));
-        int min = (int) (distance / mDensity);
-        return Math.max(350, min);
+        return mDuration;
     }
 
     public int getDirection() {
         return mDirection;
+    }
+
+    void updateDxAndDy(int dx, int dy) {
+        mDx = mX - dx;
+        mDy = mY - dy;
+    }
+
+    void setDxAndDy(int dx, int dy) {
+        mDx = dx;
+        mDy = dy;
+    }
+
+    int getDx() {
+        return mDx;
+    }
+
+    int getDy() {
+        return mDy;
+    }
+
+    Interpolator getInterpolator() {
+        return mInterpolator;
     }
 }
