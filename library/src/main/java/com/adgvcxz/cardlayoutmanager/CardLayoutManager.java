@@ -3,6 +3,8 @@ package com.adgvcxz.cardlayoutmanager;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
@@ -38,7 +40,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     private int mDy = 0;
     private boolean mIsSwipe;
     private float mTouchProportion;
-    private SparseArray<View> mCacheViews = new SparseArray<>();
+    private SparseArray<View> mViewCaches = new SparseArray<>();
     private boolean mIsScrollEnabled = true;
     private RecyclerView.Recycler mRecycler;
     private int mOrientation;
@@ -50,8 +52,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     private boolean mAnimPre;
     private int mCount = CARD_COUNT;
     private int mBottomInterval = 112;
-    private int mWidth;
-    private int mHeight;
 
 
     public CardLayoutManager() {
@@ -133,8 +133,8 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     private void fill(RecyclerView.Recycler recycler) {
 
         fillCache();
-        for (int i = 0; i < mCacheViews.size(); i++) {
-            detachView(mCacheViews.valueAt(i));
+        for (int i = 0; i < mViewCaches.size(); i++) {
+            detachView(mViewCaches.valueAt(i));
         }
 
         if ((mTargetPosition == NO_TARGET_POSITION || mTargetPosition > mTopPosition)) {
@@ -151,7 +151,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
         perHeight += perHeight / (mCount - 1);
 
         for (int i = mTopPosition; i < mTopPosition + mCount && i < getItemCount(); i++) {
-            View child = mCacheViews.get(i);
+            View child = mViewCaches.get(i);
             if (child == null) {
                 child = recycler.getViewForPosition(i);
                 child.setTranslationX(0);
@@ -168,7 +168,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 layoutDecoratedWithMargins(child, left, top, right, bottom);
             } else {
                 attachView(child, 0);
-                mCacheViews.remove(i);
+                mViewCaches.remove(i);
             }
             if (i == mTopPosition) {
                 child.setTranslationX(mDx);
@@ -219,17 +219,17 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
 //            child.setScaleY(1);
 //            child.setVisibility(View.GONE);
 //        }
-        for (int i = 0; i < mCacheViews.size(); i++) {
-            removeAndRecycleView(mCacheViews.valueAt(i), recycler);
+        for (int i = 0; i < mViewCaches.size(); i++) {
+            removeAndRecycleView(mViewCaches.valueAt(i), recycler);
         }
-        mCacheViews.clear();
+        mViewCaches.clear();
     }
 
     private void fillCache() {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             int position = getPosition(view);
-            mCacheViews.put(position, view);
+            mViewCaches.put(position, view);
         }
     }
 
@@ -502,10 +502,66 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
         if (view != null) {
             return view;
         }
-        return mCacheViews.get(position);
+        return mViewCaches.get(position);
     }
 
-//    @Override
+    @Override
+    public Parcelable onSaveInstanceState() {
+        SavedState savedState = new SavedState();
+        savedState.mTopPosition = mTopPosition;
+        return savedState;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        super.onRestoreInstanceState(state);
+        if (state != null && state instanceof CardLayoutManager.SavedState) {
+            mTopPosition = ((SavedState) state).mTopPosition;
+        }
+    }
+
+
+    private static class SavedState implements Parcelable {
+
+        public static final Parcelable.Creator<CardLayoutManager.SavedState> CREATOR
+                = new Parcelable.Creator<CardLayoutManager.SavedState>() {
+            @Override
+            public CardLayoutManager.SavedState createFromParcel(Parcel in) {
+                return new CardLayoutManager.SavedState(in);
+            }
+
+            @Override
+            public CardLayoutManager.SavedState[] newArray(int size) {
+                return new CardLayoutManager.SavedState[size];
+            }
+        };
+
+        int mTopPosition = 0;
+
+        public SavedState() {
+
+        }
+
+        SavedState(Parcel in) {
+            mTopPosition = in.readInt();
+        }
+
+        public SavedState(CardLayoutManager.SavedState other) {
+            mTopPosition = other.mTopPosition;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mTopPosition);
+        }
+    }
+
+    //    @Override
 //    public View findViewByPosition(int position) {
 //        View view = super.findViewByPosition(position);
 //        if (view != null) {

@@ -30,13 +30,13 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.ac_main_pre_2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                recyclerView.smoothScrollToPosition(layoutManager.getTopPosition() + 2);
+                recyclerView.smoothScrollToPosition(layoutManager.getTopPosition() - 2);
             }
         });
         findViewById(R.id.ac_main_next_2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                recyclerView.smoothScrollToPosition(layoutManager.getTopPosition() - 2);
+                recyclerView.smoothScrollToPosition(layoutManager.getTopPosition() + 2);
             }
         });
         final TextView textView = (TextView) findViewById(R.id.ac_main_info);
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             if (inflater == null) {
                 inflater = LayoutInflater.from(parent.getContext());
             }
-            return new MainViewHolder(inflater.inflate(R.layout.item_layout, null, false));
+            return new MainViewHolder(inflater.inflate(viewType, null, false));
         }
 
         @Override
@@ -88,7 +88,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return 10;
+            return 100;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return position % 2 == 0 ? R.layout.item_layout_top : R.layout.item_layout_down;
         }
     }
 

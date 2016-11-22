@@ -10,9 +10,16 @@
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="48dp" />
+        android:layout_marginBottom="100dp" />
 
 
+    <Button
+        android:id="@+id/ac_main_next_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/ac_main_pre_2"
+        android:layout_alignParentLeft="true"
+        android:text="smoothScrollToPosition + 2" />
 
     <Button
         android:id="@+id/ac_main_pre_2"
@@ -20,22 +27,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:text="go" />
-
-    <Button
-        android:id="@+id/ac_main_next_2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/ac_main_pre_2"
-        android:text="go" />
+        android:text="smoothScrollToPosition - 2" />
 
     <TextView
         android:id="@+id/ac_main_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        />
+        android:layout_alignParentRight="true" />
 
 </RelativeLayout>
