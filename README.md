@@ -14,7 +14,7 @@
 ``滑动`` 和 ``smoothScrollToPosition``
 
 ![](https://github.com/adgvcxz/CardLayoutManager/blob/master/img/card1.gif)
-![](https://github.com/adgvcxz/CardLayoutManager/blob/master/img/card1.gif)
+![](https://github.com/adgvcxz/CardLayoutManager/blob/master/img/card2.gif)
 
 ##初始化
 ```java
