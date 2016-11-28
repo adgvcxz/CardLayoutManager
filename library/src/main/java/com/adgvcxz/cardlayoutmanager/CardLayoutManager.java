@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -52,6 +53,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     private boolean mAnimPre;
     private int mCount = CARD_COUNT;
     private int mBottomInterval = 112;
+    private boolean mItemAnim;
 
 
     public CardLayoutManager() {
@@ -118,6 +120,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
 
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+        Log.e("zhaow", "onLayoutChildren" + state.isPreLayout() + "   " + state.willRunPredictiveAnimations() + "     " + state.willRunSimpleAnimations());
         mRecycler = recycler;
         if (getItemCount() == 0) {
             detachAndScrapAttachedViews(recycler);
@@ -127,11 +130,13 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
             detachAndScrapAttachedViews(recycler);
             return;
         }
+//        if (state.willRunSimpleAnimations()) {
+//            return;
+//        }
         fill(recycler);
     }
 
     private void fill(RecyclerView.Recycler recycler) {
-
         fillCache();
         for (int i = 0; i < mViewCaches.size(); i++) {
             detachView(mViewCaches.valueAt(i));
@@ -149,7 +154,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
 
         float perHeight = mBottomInterval / (mCount - 1);
         perHeight += perHeight / (mCount - 1);
-
         for (int i = mTopPosition; i < mTopPosition + mCount && i < getItemCount(); i++) {
             View child = mViewCaches.get(i);
             if (child == null) {
@@ -189,11 +193,18 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 }
                 float origin = 1 - number * SCALE_INTERVAL;
                 float target = origin + proportion * SCALE_INTERVAL;
-                child.setScaleX(target);
-                child.setScaleY(target);
-                child.setTranslationY((child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight);
+                float translationY = (child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight;
+                if (mItemAnim) {
+                    child.animate().scaleX(target).scaleY(target)
+                            .translationY(translationY).setDuration(300).start();
+                } else {
+                    child.setScaleX(target);
+                    child.setScaleY(target);
+                    child.setTranslationY(translationY);
+                }
             }
         }
+        mItemAnim = false;
 
 //        if (mTopPosition > 0) {
 //            View child = mCacheViews.get(mTopPosition - 1);
@@ -475,6 +486,24 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     }
 
     @Override
+    public void onItemsAdded(RecyclerView recyclerView, int positionStart, int itemCount) {
+        mItemAnim = true;
+        super.onItemsAdded(recyclerView, positionStart, itemCount);
+//        if (positionStart <= mTopPosition && positionStart + itemCount < mTopPosition + mCount) {
+//            int start = Math.max(positionStart, mTargetPosition);
+//            Log.e("zhaow", start + "    " + (mTopPosition + mCount - start - 1) + "   " + mTopPosition);
+//            fillCache();
+//            for (int i = start; i < mTopPosition + mCount - start - 1; i++) {
+//                View view = mViewCaches.get(i);
+//                Log.e("zhaow", "view====" + view);
+//                if (view != null) {
+//                    view.animate().scaleY(0.5f).scaleX(0.5f).setDuration(1000).start();
+//                }
+//            }
+//        }
+    }
+
+    @Override
     public PointF computeScrollVectorForPosition(int targetPosition) {
         return null;
     }
@@ -520,6 +549,10 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
         }
     }
 
+    @Override
+    public boolean supportsPredictiveItemAnimations() {
+        return false;
+    }
 
     private static class SavedState implements Parcelable {
 

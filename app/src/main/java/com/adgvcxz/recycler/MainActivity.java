@@ -9,16 +9,25 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.adgvcxz.cardlayoutmanager.CardItemAnimator;
 import com.adgvcxz.cardlayoutmanager.CardLayoutManager;
 import com.adgvcxz.cardlayoutmanager.CardSnapHelper;
 import com.adgvcxz.cardlayoutmanager.OnCardSwipeListener;
 
+import java.util.ArrayList;
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity {
+
+    private ArrayList<Integer> mList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        for (int i = 0; i < 100; i++) {
+            mList.add(i);
+        }
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
         final CardLayoutManager layoutManager = new CardLayoutManager();
@@ -67,15 +76,25 @@ public class MainActivity extends AppCompatActivity {
 //                Log.e("zhaow", "动画IN结束" + view + "   " + position);
             }
         });
+
+        recyclerView.setItemAnimator(new CardItemAnimator());
+
+        findViewById(R.id.ac_main_add_1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mList.add(0, -1);
+                recyclerView.getAdapter().notifyItemInserted(0);
+            }
+        });
     }
 
 
-    class MainAdapter extends RecyclerView.Adapter {
+    class MainAdapter extends RecyclerView.Adapter<MainViewHolder> {
 
         private LayoutInflater inflater;
 
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (inflater == null) {
                 inflater = LayoutInflater.from(parent.getContext());
             }
@@ -83,12 +102,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(MainViewHolder holder, int position) {
+            holder.update(mList.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return 100;
+            return mList.size();
         }
 
         @Override
@@ -100,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
     class MainViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imageView;
+        TextView textView;
 
         public MainViewHolder(View itemView) {
             super(itemView);
@@ -108,7 +129,12 @@ public class MainActivity extends AppCompatActivity {
             lp.setMargins(margin, margin, margin, margin);
             itemView.setLayoutParams(lp);
             imageView = (ImageView) itemView.findViewById(R.id.item_image);
+            textView = (TextView) itemView.findViewById(R.id.item_text);
             imageView.setImageResource(R.mipmap.ic_image);
+        }
+
+        public void update(int value) {
+            textView.setText(String.format(Locale.getDefault(), "%d", value));
         }
     }
 }
