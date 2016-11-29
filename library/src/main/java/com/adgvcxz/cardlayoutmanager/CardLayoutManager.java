@@ -1,5 +1,6 @@
 package com.adgvcxz.cardlayoutmanager;
 
+import android.animation.ObjectAnimator;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Build;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.OvershootInterpolator;
 import android.widget.LinearLayout;
 
 import java.util.Random;
@@ -54,6 +56,8 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     private int mCount = CARD_COUNT;
     private int mBottomInterval = 112;
     private boolean mItemAnim;
+    private int mStartAnimPosition;
+    private int mEndAnimPosition;
 
 
     public CardLayoutManager() {
@@ -185,6 +189,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 if (mOnCardSwipeListener != null && mIsSwipe) {
                     mOnCardSwipeListener.onSwipe(child, mTopPosition, mDx, mDy);
                 }
+                child.setVisibility(View.GONE);
             } else {
                 int number = i - mTopPosition;
                 if (i == mTopPosition + mCount - 1) {
@@ -192,11 +197,19 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                     number -= 1;
                 }
                 float origin = 1 - number * SCALE_INTERVAL;
-                float target = origin + proportion * SCALE_INTERVAL;
-                float translationY = (child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight;
+                final float target = origin + proportion * SCALE_INTERVAL;
+                final float translationY = (child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight;
                 if (mItemAnim) {
-                    child.animate().scaleX(target).scaleY(target)
-                            .translationY(translationY).setDuration(300).start();
+                    if (i >= mStartAnimPosition && i < mEndAnimPosition) {
+                        child.setScaleX(target);
+                        child.setScaleY(target);
+                        ObjectAnimator animator = ObjectAnimator.ofFloat(child, "translationY", -child.getHeight() / 2, translationY);
+                        animator.setDuration(child.getHeight() / 3);
+                        animator.setInterpolator(new OvershootInterpolator());
+                        animator.start();
+                    } else {
+                        child.animate().scaleX(target).scaleY(target).translationY(translationY).setDuration(300).start();
+                    }
                 } else {
                     child.setScaleX(target);
                     child.setScaleY(target);
@@ -488,19 +501,16 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     @Override
     public void onItemsAdded(RecyclerView recyclerView, int positionStart, int itemCount) {
         mItemAnim = true;
+        Log.e("zhaow", positionStart + "    " + mTopPosition + "    "+ itemCount + "    " + mCount);
+        Log.e("zhaow", (positionStart <= mTopPosition) + "    " + (positionStart + itemCount > mTopPosition) + "    "+ (positionStart <= mTopPosition + mCount) + "    " + (positionStart + itemCount > mTopPosition + mCount));
+        if ((positionStart >= mTopPosition && positionStart < mTopPosition + mCount)
+                || (positionStart + itemCount > mTopPosition && positionStart + itemCount <= mTopPosition + mCount)) {
+            int start = Math.max(positionStart, mTopPosition);
+            Log.e("zhaow", start + "    " + mTopPosition + "    "+ mCount + "    ");
+            mStartAnimPosition = start;
+            mEndAnimPosition = Math.min(positionStart + itemCount, mTopPosition + mCount);
+        }
         super.onItemsAdded(recyclerView, positionStart, itemCount);
-//        if (positionStart <= mTopPosition && positionStart + itemCount < mTopPosition + mCount) {
-//            int start = Math.max(positionStart, mTargetPosition);
-//            Log.e("zhaow", start + "    " + (mTopPosition + mCount - start - 1) + "   " + mTopPosition);
-//            fillCache();
-//            for (int i = start; i < mTopPosition + mCount - start - 1; i++) {
-//                View view = mViewCaches.get(i);
-//                Log.e("zhaow", "view====" + view);
-//                if (view != null) {
-//                    view.animate().scaleY(0.5f).scaleX(0.5f).setDuration(1000).start();
-//                }
-//            }
-//        }
     }
 
     @Override

@@ -205,8 +205,7 @@ public class CardItemAnimator extends SimpleItemAnimator {
     @Override
     public boolean animateAdd(final RecyclerView.ViewHolder holder) {
         resetAnimation(holder);
-        ViewCompat.setTranslationY(holder.itemView, -holder.itemView.getHeight() / 2);
-        ViewCompat.setAlpha(holder.itemView, 0.7f);
+        ViewCompat.setTranslationX(holder.itemView, -holder.itemView.getHeight() / 2);
         mPendingAdditions.add(holder);
         return true;
     }
@@ -215,9 +214,8 @@ public class CardItemAnimator extends SimpleItemAnimator {
         final View view = holder.itemView;
         final ViewPropertyAnimatorCompat animation = ViewCompat.animate(view);
         mAddAnimations.add(holder);
-        animation.translationY(0)
-                .alpha(1)
-                .setDuration(holder.itemView.getHeight() / 2)
+        animation.translationX(0)
+                .setDuration(holder.itemView.getHeight() * 3)
                 .setInterpolator(new OvershootInterpolator())
                 .setListener(new CardItemAnimator.VpaListenerAdapter() {
                     @Override

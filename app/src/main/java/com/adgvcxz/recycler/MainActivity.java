@@ -77,13 +77,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        recyclerView.setItemAnimator(new CardItemAnimator());
+//        recyclerView.setItemAnimator(new CardItemAnimator());
 
         findViewById(R.id.ac_main_add_1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mList.add(0, -1);
-                recyclerView.getAdapter().notifyItemInserted(0);
+                mList.add(1, -1);
+                recyclerView.getAdapter().notifyItemInserted(1);
             }
         });
     }
