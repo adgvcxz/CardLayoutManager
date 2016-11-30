@@ -37,6 +37,12 @@ public class CardItemAnimator extends SimpleItemAnimator {
     ArrayList<RecyclerView.ViewHolder> mRemoveAnimations = new ArrayList<>();
     ArrayList<RecyclerView.ViewHolder> mChangeAnimations = new ArrayList<>();
 
+    private CardLayoutManager mCardLayoutManager;
+
+    public CardItemAnimator(CardLayoutManager manager) {
+        mCardLayoutManager = manager;
+    }
+
     private static class MoveInfo {
         public RecyclerView.ViewHolder holder;
         public int fromX, fromY, toX, toY;
@@ -205,7 +211,7 @@ public class CardItemAnimator extends SimpleItemAnimator {
     @Override
     public boolean animateAdd(final RecyclerView.ViewHolder holder) {
         resetAnimation(holder);
-        ViewCompat.setTranslationX(holder.itemView, -holder.itemView.getHeight() / 2);
+        ViewCompat.setTranslationY(holder.itemView, -holder.itemView.getHeight() / 2);
         mPendingAdditions.add(holder);
         return true;
     }
@@ -214,8 +220,8 @@ public class CardItemAnimator extends SimpleItemAnimator {
         final View view = holder.itemView;
         final ViewPropertyAnimatorCompat animation = ViewCompat.animate(view);
         mAddAnimations.add(holder);
-        animation.translationX(0)
-                .setDuration(holder.itemView.getHeight() * 3)
+        animation.translationY(mCardLayoutManager.getTranslationY(holder.getAdapterPosition(), holder.itemView.getHeight()))
+                .setDuration(holder.itemView.getHeight() / 3)
                 .setInterpolator(new OvershootInterpolator())
                 .setListener(new CardItemAnimator.VpaListenerAdapter() {
                     @Override

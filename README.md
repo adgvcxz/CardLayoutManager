@@ -1,4 +1,4 @@
-# CardLayoutManager
+# CardLayoutManager(目前还有问题  还在开发中)
 
 ##简单、可扩展的一个LayoutManager，实现了类似于探探和Tinder，滑动图片
 

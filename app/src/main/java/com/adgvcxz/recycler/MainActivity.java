@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        recyclerView.setItemAnimator(new CardItemAnimator());
+        recyclerView.setItemAnimator(new CardItemAnimator(layoutManager));
 
         findViewById(R.id.ac_main_add_1).setOnClickListener(new View.OnClickListener() {
             @Override

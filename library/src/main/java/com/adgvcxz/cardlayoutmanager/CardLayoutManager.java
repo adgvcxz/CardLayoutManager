@@ -1,10 +1,8 @@
 package com.adgvcxz.cardlayoutmanager;
 
-import android.animation.ObjectAnimator;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Build;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,7 +11,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.OvershootInterpolator;
 import android.widget.LinearLayout;
 
 import java.util.Random;
@@ -96,6 +93,11 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
         return mTopPosition;
     }
 
+    public void setSwipeMinVelocity(int velocity) {
+        mCardSwipeController.setMinVelocity(velocity);
+    }
+
+
     @Override
     public void onAttachedToWindow(final RecyclerView view) {
         super.onAttachedToWindow(view);
@@ -124,7 +126,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
 
     @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
-        Log.e("zhaow", "onLayoutChildren" + state.isPreLayout() + "   " + state.willRunPredictiveAnimations() + "     " + state.willRunSimpleAnimations());
         mRecycler = recycler;
         if (getItemCount() == 0) {
             detachAndScrapAttachedViews(recycler);
@@ -150,74 +151,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
             findTopView();
         }
 
-        float proportion = 1;
-        int paddingLeft = getPaddingLeft();
-        int paddingRight = getPaddingRight();
-        int paddingTop = getPaddingTop();
-        int paddingBottom = getPaddingBottom();
-
-        float perHeight = mBottomInterval / (mCount - 1);
-        perHeight += perHeight / (mCount - 1);
-        for (int i = mTopPosition; i < mTopPosition + mCount && i < getItemCount(); i++) {
-            View child = mViewCaches.get(i);
-            if (child == null) {
-                child = recycler.getViewForPosition(i);
-                child.setTranslationX(0);
-                child.setTranslationY(0);
-                child.setRotation(0);
-                addView(child, 0);
-                measureChildWithMargins(child, 0, 0);
-                int width = getDecoratedMeasurementHorizontal(child);
-                int height = getDecoratedMeasurementVertical(child);
-                int left = (getWidth() - width + paddingLeft - paddingRight) / 2;
-                int right = left + width;
-                int top = (getHeight() - height + paddingTop - paddingBottom) / 2;
-                int bottom = top + height - mBottomInterval;
-                layoutDecoratedWithMargins(child, left, top, right, bottom);
-            } else {
-                attachView(child, 0);
-                mViewCaches.remove(i);
-            }
-            if (i == mTopPosition) {
-                child.setTranslationX(mDx);
-                child.setTranslationY(mDy);
-                child.setRotation(getRotation());
-                child.setScaleX(1);
-                child.setScaleY(1);
-                mMinDistance = getMinDistance();
-                proportion = getProportion(child);
-                if (mOnCardSwipeListener != null && mIsSwipe) {
-                    mOnCardSwipeListener.onSwipe(child, mTopPosition, mDx, mDy);
-                }
-                child.setVisibility(View.GONE);
-            } else {
-                int number = i - mTopPosition;
-                if (i == mTopPosition + mCount - 1) {
-                    proportion = 0;
-                    number -= 1;
-                }
-                float origin = 1 - number * SCALE_INTERVAL;
-                final float target = origin + proportion * SCALE_INTERVAL;
-                final float translationY = (child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight;
-                if (mItemAnim) {
-                    if (i >= mStartAnimPosition && i < mEndAnimPosition) {
-                        child.setScaleX(target);
-                        child.setScaleY(target);
-                        ObjectAnimator animator = ObjectAnimator.ofFloat(child, "translationY", -child.getHeight() / 2, translationY);
-                        animator.setDuration(child.getHeight() / 3);
-                        animator.setInterpolator(new OvershootInterpolator());
-                        animator.start();
-                    } else {
-                        child.animate().scaleX(target).scaleY(target).translationY(translationY).setDuration(300).start();
-                    }
-                } else {
-                    child.setScaleX(target);
-                    child.setScaleY(target);
-                    child.setTranslationY(translationY);
-                }
-            }
-        }
-        mItemAnim = false;
+        fillChild(recycler);
 
 //        if (mTopPosition > 0) {
 //            View child = mCacheViews.get(mTopPosition - 1);
@@ -249,12 +183,110 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
         mViewCaches.clear();
     }
 
+    private void fillChild(RecyclerView.Recycler recycler) {
+        float proportion = 1;
+        int paddingLeft = getPaddingLeft();
+        int paddingRight = getPaddingRight();
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
+
+        float perHeight = mBottomInterval / (mCount - 1);
+        perHeight += perHeight / (mCount - 1);
+        for (int i = mTopPosition; i < mTopPosition + mCount && i < getItemCount(); i++) {
+            View child = mViewCaches.get(i);
+            if (child == null) {
+                child = recycler.getViewForPosition(i);
+                child.setTranslationX(0);
+                child.setTranslationY(0);
+                child.setRotation(0);
+                addView(child, 0);
+                measureChildWithMargins(child, 0, 0);
+                int width = getDecoratedMeasurementHorizontal(child);
+                int height = getDecoratedMeasurementVertical(child);
+                int left = (getWidth() - width + paddingLeft - paddingRight) / 2;
+                int right = left + width;
+                int top = (getHeight() - height + paddingTop - paddingBottom) / 2;
+                int bottom = top + height - mBottomInterval;
+                layoutDecoratedWithMargins(child, left, top, right, bottom);
+            } else {
+                attachView(child, 0);
+                mViewCaches.remove(i);
+            }
+            if (i == mTopPosition) {
+                proportion = layoutTopChild(child);
+            } else {
+                int number = i - mTopPosition;
+                if (i == mTopPosition + mCount - 1) {
+                    proportion = 0;
+                    number -= 1;
+                }
+                float origin = 1 - number * SCALE_INTERVAL;
+                final float target = origin + proportion * SCALE_INTERVAL;
+                final float translationY = (child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight;
+                if (mItemAnim) {
+                    if (i >= mStartAnimPosition && i < mEndAnimPosition) {
+                        child.setScaleX(target);
+                        child.setScaleY(target);
+//                        ObjectAnimator animator = ObjectAnimator.ofFloat(child, "translationY", -child.getHeight() / 2, translationY);
+//                        animator.setDuration(child.getHeight() / 3);
+//                        animator.setInterpolator(new OvershootInterpolator());
+//                        animator.start();
+                    } else {
+                        child.animate().scaleX(target).scaleY(target).translationY(translationY).setDuration(300).start();
+                    }
+                } else {
+                    child.setScaleX(target);
+                    child.setScaleY(target);
+                    child.setTranslationY(translationY);
+                }
+            }
+        }
+        mItemAnim = false;
+    }
+
+    private float layoutTopChild(View child) {
+        float proportion;
+        child.setTranslationX(mDx);
+        child.setTranslationY(mDy);
+        child.setRotation(getRotation());
+        child.setScaleX(1);
+        child.setScaleY(1);
+        mMinDistance = getMinDistance();
+        proportion = getProportion(child);
+        if (mOnCardSwipeListener != null && mIsSwipe) {
+            mOnCardSwipeListener.onSwipe(child, mTopPosition, mDx, mDy);
+        }
+        return proportion;
+    }
+
     private void fillCache() {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             int position = getPosition(view);
             mViewCaches.put(position, view);
         }
+    }
+
+    public float getScale(int position) {
+        if (position >= mTopPosition && position < mTopPosition + mCount && position < getItemCount()) {
+            if (position == mTopPosition + mCount - 1) {
+                return 1 - (position - mTopPosition - 1) * SCALE_INTERVAL;
+            }
+            return 1 - (position - mTopPosition) * SCALE_INTERVAL;
+        }
+        return 0;
+    }
+
+    public float getTranslationY(int position, int height) {
+        float perHeight = mBottomInterval / (mCount - 1);
+        perHeight += perHeight / (mCount - 1);
+        if (position >= mTopPosition && position < mTopPosition + mCount && position < getItemCount()) {
+            if (position == mTopPosition + mCount - 1) {
+                position -= 1;
+            }
+            return height * (1 - getScale(position)) / 2 + (position - mTopPosition) * perHeight;
+        }
+        return 0;
     }
 
     private float getRotation() {
@@ -321,10 +353,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
             mIsSwipe = false;
             mCardSwipeController.setDegree(0);
         }
-    }
-
-    public void setSwipeMinVelocity(int velocity) {
-        mCardSwipeController.setMinVelocity(velocity);
     }
 
     @Override
@@ -501,12 +529,12 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     @Override
     public void onItemsAdded(RecyclerView recyclerView, int positionStart, int itemCount) {
         mItemAnim = true;
-        Log.e("zhaow", positionStart + "    " + mTopPosition + "    "+ itemCount + "    " + mCount);
-        Log.e("zhaow", (positionStart <= mTopPosition) + "    " + (positionStart + itemCount > mTopPosition) + "    "+ (positionStart <= mTopPosition + mCount) + "    " + (positionStart + itemCount > mTopPosition + mCount));
+        Log.e("zhaow", positionStart + "    " + mTopPosition + "    " + itemCount + "    " + mCount);
+        Log.e("zhaow", (positionStart <= mTopPosition) + "    " + (positionStart + itemCount > mTopPosition) + "    " + (positionStart <= mTopPosition + mCount) + "    " + (positionStart + itemCount > mTopPosition + mCount));
         if ((positionStart >= mTopPosition && positionStart < mTopPosition + mCount)
                 || (positionStart + itemCount > mTopPosition && positionStart + itemCount <= mTopPosition + mCount)) {
             int start = Math.max(positionStart, mTopPosition);
-            Log.e("zhaow", start + "    " + mTopPosition + "    "+ mCount + "    ");
+            Log.e("zhaow", start + "    " + mTopPosition + "    " + mCount + "    ");
             mStartAnimPosition = start;
             mEndAnimPosition = Math.min(positionStart + itemCount, mTopPosition + mCount);
         }
@@ -554,7 +582,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     @Override
     public void onRestoreInstanceState(Parcelable state) {
         super.onRestoreInstanceState(state);
-        if (state != null && state instanceof CardLayoutManager.SavedState) {
+        if (state != null && state instanceof SavedState) {
             mTopPosition = ((SavedState) state).mTopPosition;
         }
     }
@@ -564,45 +592,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
         return false;
     }
 
-    private static class SavedState implements Parcelable {
-
-        public static final Parcelable.Creator<CardLayoutManager.SavedState> CREATOR
-                = new Parcelable.Creator<CardLayoutManager.SavedState>() {
-            @Override
-            public CardLayoutManager.SavedState createFromParcel(Parcel in) {
-                return new CardLayoutManager.SavedState(in);
-            }
-
-            @Override
-            public CardLayoutManager.SavedState[] newArray(int size) {
-                return new CardLayoutManager.SavedState[size];
-            }
-        };
-
-        int mTopPosition = 0;
-
-        public SavedState() {
-
-        }
-
-        SavedState(Parcel in) {
-            mTopPosition = in.readInt();
-        }
-
-        public SavedState(CardLayoutManager.SavedState other) {
-            mTopPosition = other.mTopPosition;
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mTopPosition);
-        }
-    }
 
     //    @Override
 //    public View findViewByPosition(int position) {
