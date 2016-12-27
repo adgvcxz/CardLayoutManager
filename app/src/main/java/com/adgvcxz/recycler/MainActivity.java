@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.adgvcxz.cardlayoutmanager.CardItemAnimator;
 import com.adgvcxz.cardlayoutmanager.CardLayoutManager;
 import com.adgvcxz.cardlayoutmanager.CardSnapHelper;
 import com.adgvcxz.cardlayoutmanager.OnCardSwipeListener;
@@ -79,13 +78,6 @@ public class MainActivity extends AppCompatActivity {
 
 //        recyclerView.setItemAnimator(new CardItemAnimator(layoutManager));
 
-        findViewById(R.id.ac_main_add_1).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mList.add(0, -1);
-                recyclerView.getAdapter().notifyItemInserted(0);
-            }
-        });
     }
 
 

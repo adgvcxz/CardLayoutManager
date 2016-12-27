@@ -23,14 +23,6 @@
         android:text="smoothScrollToPosition + 2" />
 
     <Button
-        android:id="@+id/ac_main_add_1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/ac_main_pre_2"
-        android:layout_toRightOf="@+id/ac_main_next_2"
-        android:text="add + 1" />
-
-    <Button
         android:id="@+id/ac_main_pre_2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -34,8 +34,8 @@ layoutManager.setOnCardSwipeListener(new OnCardSwipeListener() {
 如果想完全控制整个滑动，则需要继承``CardSwipeController``实现其中所有方法
 
 ## 待开发
+
 * 优化``smoothScrollToPosition``
-* 实现``CardItemAnimator``
 
 ## 感谢
 

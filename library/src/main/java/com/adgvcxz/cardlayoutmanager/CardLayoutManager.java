@@ -5,7 +5,6 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -52,9 +51,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     private boolean mAnimPre;
     private int mCount = CARD_COUNT;
     private int mBottomInterval = 112;
-    private boolean mItemAnim;
-    private int mStartAnimPosition;
-    private int mEndAnimPosition;
 
 
     public CardLayoutManager() {
@@ -223,26 +219,11 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 float origin = 1 - number * SCALE_INTERVAL;
                 final float target = origin + proportion * SCALE_INTERVAL;
                 final float translationY = (child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight;
-                Log.e("zhaow", "mItem" + mItemAnim);
-                if (mItemAnim) {
-                    if (i >= mStartAnimPosition && i < mEndAnimPosition) {
-                        child.setScaleX(target);
-                        child.setScaleY(target);
-//                        ObjectAnimator animator = ObjectAnimator.ofFloat(child, "translationY", -child.getHeight() / 2, translationY);
-//                        animator.setDuration(child.getHeight() / 3);
-//                        animator.setInterpolator(new OvershootInterpolator());
-//                        animator.start();
-                    } else {
-                        child.animate().scaleX(target).scaleY(target).translationY(translationY).setDuration(300).start();
-                    }
-                } else {
-                    child.setScaleX(target);
-                    child.setScaleY(target);
-                    child.setTranslationY(translationY);
-                }
+                child.setScaleX(target);
+                child.setScaleY(target);
+                child.setTranslationY(translationY);
             }
         }
-        mItemAnim = false;
     }
 
     private float layoutTopChild(View child) {
@@ -525,18 +506,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
             }
             mIsSwipe = true;
         }
-    }
-
-    @Override
-    public void onItemsAdded(RecyclerView recyclerView, int positionStart, int itemCount) {
-        if ((positionStart >= mTopPosition && positionStart < mTopPosition + mCount)
-                || (positionStart + itemCount > mTopPosition && positionStart + itemCount <= mTopPosition + mCount)) {
-            mItemAnim = true;
-            Log.e("zhaow", "=============");
-            mStartAnimPosition = Math.max(positionStart, mTopPosition);
-            mEndAnimPosition = Math.min(positionStart + itemCount, mTopPosition + mCount);
-        }
-        super.onItemsAdded(recyclerView, positionStart, itemCount);
     }
 
     @Override
