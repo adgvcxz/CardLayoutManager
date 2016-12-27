@@ -7,7 +7,6 @@ import android.support.v4.view.ViewPropertyAnimatorCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
 
@@ -180,7 +179,6 @@ public class CardItemAnimator extends SimpleItemAnimator {
 
     @Override
     public boolean animateRemove(final RecyclerView.ViewHolder holder) {
-        Log.e("zhaow", "animateRemove");
         resetAnimation(holder);
         mPendingRemovals.add(holder);
         return true;
@@ -247,7 +245,6 @@ public class CardItemAnimator extends SimpleItemAnimator {
     @Override
     public boolean animateMove(final RecyclerView.ViewHolder holder, int fromX, int fromY,
                                int toX, int toY) {
-        Log.e("zhaow", "animateMove");
         final View view = holder.itemView;
         fromX += ViewCompat.getTranslationX(holder.itemView);
         fromY += ViewCompat.getTranslationY(holder.itemView);
@@ -312,7 +309,6 @@ public class CardItemAnimator extends SimpleItemAnimator {
     @Override
     public boolean animateChange(RecyclerView.ViewHolder oldHolder, RecyclerView.ViewHolder newHolder,
                                  int fromX, int fromY, int toX, int toY) {
-        Log.e("zhaow", "animateChange");
         if (oldHolder == newHolder) {
             // Don't know how to run change animations when the same view holder is re-used.
             // run a move animation to handle position changes.
@@ -431,7 +427,6 @@ public class CardItemAnimator extends SimpleItemAnimator {
 
     @Override
     public void endAnimation(RecyclerView.ViewHolder item) {
-        Log.e("zhaow", "endAnimation");
         final View view = item.itemView;
         // this will trigger end callback which should set properties to their target values.
         ViewCompat.animate(view).cancel();
@@ -523,17 +518,6 @@ public class CardItemAnimator extends SimpleItemAnimator {
 
     @Override
     public boolean isRunning() {
-        Log.e("zhaow", "isRunning" + (!mPendingAdditions.isEmpty() ||
-                !mPendingChanges.isEmpty() ||
-                !mPendingMoves.isEmpty() ||
-                !mPendingRemovals.isEmpty() ||
-                !mMoveAnimations.isEmpty() ||
-                !mRemoveAnimations.isEmpty() ||
-                !mAddAnimations.isEmpty() ||
-                !mChangeAnimations.isEmpty() ||
-                !mMovesList.isEmpty() ||
-                !mAdditionsList.isEmpty() ||
-                !mChangesList.isEmpty()));
         return (!mPendingAdditions.isEmpty() ||
                 !mPendingChanges.isEmpty() ||
                 !mPendingMoves.isEmpty() ||
@@ -560,7 +544,6 @@ public class CardItemAnimator extends SimpleItemAnimator {
 
     @Override
     public void endAnimations() {
-        Log.e("zhaow", "endAnimations");
         int count = mPendingMoves.size();
         for (int i = count - 1; i >= 0; i--) {
             CardItemAnimator.MoveInfo item = mPendingMoves.get(i);

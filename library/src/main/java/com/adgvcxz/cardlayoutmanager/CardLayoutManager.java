@@ -223,6 +223,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 float origin = 1 - number * SCALE_INTERVAL;
                 final float target = origin + proportion * SCALE_INTERVAL;
                 final float translationY = (child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight;
+                Log.e("zhaow", "mItem" + mItemAnim);
                 if (mItemAnim) {
                     if (i >= mStartAnimPosition && i < mEndAnimPosition) {
                         child.setScaleX(target);
@@ -528,14 +529,11 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
 
     @Override
     public void onItemsAdded(RecyclerView recyclerView, int positionStart, int itemCount) {
-        mItemAnim = true;
-        Log.e("zhaow", positionStart + "    " + mTopPosition + "    " + itemCount + "    " + mCount);
-        Log.e("zhaow", (positionStart <= mTopPosition) + "    " + (positionStart + itemCount > mTopPosition) + "    " + (positionStart <= mTopPosition + mCount) + "    " + (positionStart + itemCount > mTopPosition + mCount));
         if ((positionStart >= mTopPosition && positionStart < mTopPosition + mCount)
                 || (positionStart + itemCount > mTopPosition && positionStart + itemCount <= mTopPosition + mCount)) {
-            int start = Math.max(positionStart, mTopPosition);
-            Log.e("zhaow", start + "    " + mTopPosition + "    " + mCount + "    ");
-            mStartAnimPosition = start;
+            mItemAnim = true;
+            Log.e("zhaow", "=============");
+            mStartAnimPosition = Math.max(positionStart, mTopPosition);
             mEndAnimPosition = Math.min(positionStart + itemCount, mTopPosition + mCount);
         }
         super.onItemsAdded(recyclerView, positionStart, itemCount);
