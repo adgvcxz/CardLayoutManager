@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         layoutManager.setOnCardSwipeListener(new OnCardSwipeListener() {
             @Override
             public void onSwipe(View view, int position, int dx, int dy) {
-//                Log.e("zhaow", "onSwipe" + dx + "    " + dy);
                 textView.setText(String.format(getString(R.string.info), dx, dy));
             }
 

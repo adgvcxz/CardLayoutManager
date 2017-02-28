@@ -1,10 +1,10 @@
-# CardLayoutManager(目前还有问题  还在开发中)
+# CardLayoutManager
 
 ##简单、可扩展的一个LayoutManager，实现了类似于探探和Tinder，滑动图片
 
 * 监听滑动中的事件与动画过程
 * 支持``smoothScrollToPosition``和``scrollToPosition``
-* 自定义``LinearLayout.HORIZONTAL``或者``LinearLayout.HORIZONTAL``
+* 自定义``LinearLayout.HORIZONTAL``或者``LinearLayout.VERTICAL``
 * 自定义显示卡片个数以及卡片之间的间隙
 * 对滑动过程进行控制
 * 简单易用，扩展性高
@@ -36,6 +36,7 @@ layoutManager.setOnCardSwipeListener(new OnCardSwipeListener() {
 ## 待开发
 
 * 优化``smoothScrollToPosition``
+* ``notifyItemInserted``等的动画支持
 
 ## 感谢
 
