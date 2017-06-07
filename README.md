@@ -1,6 +1,6 @@
 # CardLayoutManager
 
-##简单、可扩展的一个LayoutManager，实现了类似于探探和Tinder，滑动图片
+### 简单、可扩展的一个LayoutManager，实现了类似于探探和Tinder，滑动图片
 
 * 监听滑动中的事件与动画过程
 * 支持``smoothScrollToPosition``和``scrollToPosition``
@@ -9,34 +9,30 @@
 * 对滑动过程进行控制
 * 简单易用，扩展性高
 
-##预览
+## 预览
 
 ``滑动`` 和 ``smoothScrollToPosition``
 
 ![](https://github.com/adgvcxz/CardLayoutManager/blob/master/img/card1.gif)
 ![](https://github.com/adgvcxz/CardLayoutManager/blob/master/img/card2.gif)
 
-##初始化
+## 初始化
 ```java
 CardLayoutManager layoutManager = new CardLayoutManager();
 recyclerView.setLayoutManager(layoutManager);
 new CardSnapHelper().attachToRecyclerView(recyclerView);
 ```
-##监听滑动事件
+## 监听滑动事件
 ```java
 layoutManager.setOnCardSwipeListener(new OnCardSwipeListener() {
 	......
 }
 ```
-##自定义滑动控制
+## 自定义滑动控制
 如果只是在``smoothScrollToPosition``不想随机卡片的起点和终点可以继承``BaseCardSwipeController``重写其中的方法
 
 如果想完全控制整个滑动，则需要继承``CardSwipeController``实现其中所有方法
 
-## 待开发
-
-* 优化``smoothScrollToPosition``
-* ``notifyItemInserted``等的动画支持
 
 ## 感谢
 
