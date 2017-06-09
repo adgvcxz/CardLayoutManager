@@ -33,6 +33,20 @@ layoutManager.setOnCardSwipeListener(new OnCardSwipeListener() {
 
 如果想完全控制整个滑动，则需要继承``CardSwipeController``实现其中所有方法
 
+## 导入
+
+```
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+dependencies {
+    compile 'com.github.adgvcxz:CardLayoutManager:0.1.0'
+}
+```
 
 ## 感谢
 
