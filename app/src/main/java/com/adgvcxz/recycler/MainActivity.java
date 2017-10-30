@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < 100; i++) {
             mList.add(i);
         }
-        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        final RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
         final CardLayoutManager layoutManager = new CardLayoutManager();
         recyclerView.setLayoutManager(layoutManager);
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                 recyclerView.smoothScrollToPosition(layoutManager.getTopPosition() + 2);
             }
         });
-        final TextView textView = (TextView) findViewById(R.id.ac_main_info);
+        final TextView textView = findViewById(R.id.ac_main_info);
         layoutManager.setOnCardSwipeListener(new OnCardSwipeListener() {
             @Override
             public void onSwipe(View view, int position, int dx, int dy) {
@@ -119,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
             int margin = itemView.getResources().getDimensionPixelSize(R.dimen.activity_vertical_margin);
             lp.setMargins(margin, margin, margin, margin);
             itemView.setLayoutParams(lp);
-            imageView = (ImageView) itemView.findViewById(R.id.item_image);
-            textView = (TextView) itemView.findViewById(R.id.item_text);
+            imageView = itemView.findViewById(R.id.item_image);
+            textView = itemView.findViewById(R.id.item_text);
             imageView.setImageResource(R.mipmap.ic_image);
         }
 

@@ -131,9 +131,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
             detachAndScrapAttachedViews(recycler);
             return;
         }
-//        if (state.willRunSimpleAnimations()) {
-//            return;
-//        }
         fill(recycler);
     }
 
@@ -149,30 +146,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
 
         fillChild(recycler);
 
-//        if (mTopPosition > 0) {
-//            View child = mCacheViews.get(mTopPosition - 1);
-//            if (child == null) {
-//                child = recycler.getViewForPosition(mTopPosition - 1);
-//                addView(child, 0);
-//                measureChildWithMargins(child, 0, 0);
-//                int width = getDecoratedMeasurementHorizontal(child);
-//                int height = getDecoratedMeasurementVertical(child);
-//                int left = (getWidth() - width + paddingLeft - paddingRight) / 2;
-//                int right = left + width;
-//                int top = (getHeight() - height + paddingTop - paddingBottom) / 2;
-//                int bottom = top + height - 112;
-//                layoutDecoratedWithMargins(child, left, top, right, bottom);
-//            } else {
-//                attachView(child, 0);
-//                mCacheViews.remove(mTopPosition - 1);
-//            }
-//            child.setTranslationX(getWidth());
-//            child.setTranslationY(getHeight());
-//            child.setRotation(0);
-//            child.setScaleX(1);
-//            child.setScaleY(1);
-//            child.setVisibility(View.GONE);
-//        }
         for (int i = 0; i < mViewCaches.size(); i++) {
             removeAndRecycleView(mViewCaches.valueAt(i), recycler);
         }
@@ -484,8 +457,10 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     @Override
     public void onItemsChanged(RecyclerView recyclerView) {
         super.onItemsChanged(recyclerView);
-        removeAllViews();
-        fill(mRecycler);
+        if (mRecycler != null) {
+            removeAllViews();
+            fill(mRecycler);
+        }
     }
 
     void setDownPoint(View view, int x, int y) {
