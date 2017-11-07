@@ -22,6 +22,14 @@ import java.util.Random;
 public class CardLayoutManager extends RecyclerView.LayoutManager implements
         RecyclerView.SmoothScroller.ScrollVectorProvider, OnAnimationListener {
 
+    public enum TransX {
+        NONE, LEFT, RIGHT
+    }
+
+    public enum TransY {
+        NONE, TOP, BOTTOM
+    }
+
     public static final int DIRECTION_START = 1;
     public static final int DIRECTION_END = 2;
 
@@ -50,19 +58,28 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     private int mAnimDirection = DIRECTION_START;
     private boolean mAnimPre;
     private int mCount = CARD_COUNT;
-    private int mBottomInterval = 112;
-
+    private int mYInterval = 112;
+    private int mXInterval = 112;
+    private TransX mTranxX;
+    private TransY mTranxY;
 
     public CardLayoutManager() {
         this(LinearLayout.HORIZONTAL);
     }
 
     public CardLayoutManager(int orientation) {
-        this(orientation, null);
+        this(orientation, TransX.NONE, TransY.BOTTOM, null);
     }
 
-    public CardLayoutManager(int orientation, CardSwipeController cardSwipeController) {
+    public CardLayoutManager(TransX transX, TransY transY) {
+        this(LinearLayout.HORIZONTAL, transX, transY, null);
+    }
+
+    public CardLayoutManager(int orientation, TransX transX, TransY transY,
+                             CardSwipeController cardSwipeController) {
         mOrientation = orientation;
+        mTranxX = transX;
+        mTranxY = transY;
         if (cardSwipeController != null) {
             mCardSwipeController = cardSwipeController;
         } else {
@@ -70,8 +87,16 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
         }
     }
 
-    public void setBottomInterval(int interval) {
-        mBottomInterval = interval;
+    public void setInterval(int xInterval, int yInterval) {
+        setXInterval(xInterval);
+        setYInterval(yInterval);
+    }
+
+    public void setYInterval(int interval) {
+        mYInterval = interval;
+    }
+    public void setXInterval(int interval) {
+        mXInterval = interval;
     }
 
     public void setShowCardCount(int count) {
@@ -159,8 +184,10 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
         int paddingTop = getPaddingTop();
         int paddingBottom = getPaddingBottom();
 
-        float perHeight = mBottomInterval / (mCount - 1);
+        float perHeight = mYInterval / (mCount - 1);
+        float perWidth = mXInterval / (mCount - 1);
         perHeight += perHeight / (mCount - 1);
+        perWidth += perWidth / (mCount - 1);
         for (int i = mTopPosition; i < mTopPosition + mCount && i < getItemCount(); i++) {
             View child = mViewCaches.get(i);
             if (child == null) {
@@ -172,10 +199,31 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 measureChildWithMargins(child, 0, 0);
                 int width = getDecoratedMeasurementHorizontal(child);
                 int height = getDecoratedMeasurementVertical(child);
+
                 int left = (getWidth() - width + paddingLeft - paddingRight) / 2;
                 int right = left + width;
                 int top = (getHeight() - height + paddingTop - paddingBottom) / 2;
-                int bottom = top + height - mBottomInterval;
+                int bottom = top + height;
+
+                switch (mTranxX) {
+                    case LEFT:
+                        left += mXInterval;
+                        break;
+                    case RIGHT:
+                        right -= mXInterval;
+                        break;
+                }
+                switch (mTranxY) {
+                    case TOP:
+                        top += mYInterval;
+                        break;
+                    case BOTTOM:
+                        bottom -= mYInterval;
+                        break;
+                }
+
+
+
                 layoutDecoratedWithMargins(child, left, top, right, bottom);
             } else {
                 attachView(child, 0);
@@ -191,10 +239,22 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 }
                 float origin = 1 - number * SCALE_INTERVAL;
                 final float target = origin + proportion * SCALE_INTERVAL;
-                final float translationY = (child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight;
+                float translationY = (child.getHeight()) * (1 - target) / 2 + (number - proportion) * perHeight;
+                float translationX = (child.getWidth()) * (1 - target) / 2 + (number - proportion) * perWidth;
                 child.setScaleX(target);
                 child.setScaleY(target);
-                child.setTranslationY(translationY);
+                switch (mTranxY) {
+                    case TOP:
+                        translationY *= -1;
+                    case BOTTOM:
+                        child.setTranslationY(translationY);
+                }
+                switch (mTranxX) {
+                    case LEFT:
+                        translationX *= -1;
+                    case RIGHT:
+                        child.setTranslationX(translationX);
+                }
             }
         }
     }
@@ -233,7 +293,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     }
 
     public float getTranslationY(int position, int height) {
-        float perHeight = mBottomInterval / (mCount - 1);
+        float perHeight = mYInterval / (mCount - 1);
         perHeight += perHeight / (mCount - 1);
         if (position >= mTopPosition && position < mTopPosition + mCount && position < getItemCount()) {
             if (position == mTopPosition + mCount - 1) {
