@@ -168,7 +168,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
             detachView(mViewCaches.valueAt(i));
         }
 
-        if ((mTargetPosition == NO_TARGET_POSITION || mTargetPosition > mTopPosition)) {
+        if (mTargetPosition == NO_TARGET_POSITION || mTargetPosition > mTopPosition) {
             findTopView();
         }
 
@@ -224,9 +224,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                         bottom -= mYInterval;
                         break;
                 }
-
-
-
                 layoutDecoratedWithMargins(child, left, top, right, bottom);
             } else {
                 attachView(child, 0);
@@ -402,7 +399,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                     smoothScrollPre(mTargetPosition);
                 } else {
                     if (mAnimPre) {
-                        mAnimPre = false;
                         if (mOnCardSwipeListener != null) {
                             mOnCardSwipeListener.onAnimInStop(getViewByPosition(mTopPosition), mTopPosition);
                         }
