@@ -29,11 +29,12 @@ public class MainActivity extends AppCompatActivity {
         }
         final RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
-        final CardLayoutManager layoutManager = new CardLayoutManager();
+        final CardLayoutManager layoutManager = new CardLayoutManager(CardLayoutManager.TransX.RIGHT, CardLayoutManager.TransY.NONE);
+        layoutManager.setVerticalSwipe(false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(new MainAdapter());
         new CardSnapHelper().attachToRecyclerView(recyclerView);
-        layoutManager.setBottomInterval(getResources().getDimensionPixelSize(R.dimen.card_bottom_interval));
+        layoutManager.setYInterval(getResources().getDimensionPixelSize(R.dimen.card_bottom_interval));
         layoutManager.setShowCardCount(4);
         findViewById(R.id.ac_main_pre_2).setOnClickListener(new View.OnClickListener() {
             @Override

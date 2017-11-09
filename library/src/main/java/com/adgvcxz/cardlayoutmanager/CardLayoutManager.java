@@ -63,6 +63,9 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     private TransX mTranxX;
     private TransY mTranxY;
 
+    private boolean verticalScroll = true;
+    private boolean horizontalScroll = true;
+
     public CardLayoutManager() {
         this(LinearLayout.HORIZONTAL);
     }
@@ -370,14 +373,22 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
         }
     }
 
+    public void setVerticalSwipe(boolean verticalSwipe) {
+        this.verticalScroll = verticalSwipe;
+    }
+
+    public void setHorizontalSwipe(boolean horizontalSwipe) {
+        this.horizontalScroll = horizontalSwipe;
+    }
+
     @Override
     public boolean canScrollVertically() {
-        return true;
+        return verticalScroll;
     }
 
     @Override
     public boolean canScrollHorizontally() {
-        return true;
+        return horizontalScroll;
     }
 
     @Override
