@@ -399,6 +399,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                     smoothScrollPre(mTargetPosition);
                 } else {
                     if (mAnimPre) {
+                        mAnimPre = false;
                         if (mOnCardSwipeListener != null) {
                             mOnCardSwipeListener.onAnimInStop(getViewByPosition(mTopPosition), mTopPosition);
                         }
