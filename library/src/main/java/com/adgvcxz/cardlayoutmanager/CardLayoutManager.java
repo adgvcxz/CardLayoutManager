@@ -208,22 +208,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 int top = (getHeight() - height + paddingTop - paddingBottom) / 2;
                 int bottom = top + height;
 
-                switch (mTranxX) {
-                    case LEFT:
-                        left += mXInterval;
-                        break;
-                    case RIGHT:
-                        right -= mXInterval;
-                        break;
-                }
-                switch (mTranxY) {
-                    case TOP:
-                        top += mYInterval;
-                        break;
-                    case BOTTOM:
-                        bottom -= mYInterval;
-                        break;
-                }
                 layoutDecoratedWithMargins(child, left, top, right, bottom);
             } else {
                 attachView(child, 0);
