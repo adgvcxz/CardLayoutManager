@@ -560,18 +560,21 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     public void onStartOut(int direction) {
         mAnimStatus = ANIMATION_OUT;
         mAnimDirection = direction;
-        mOnCardSwipeListener.onAnimOutStart(getViewByPosition(mTopPosition), mTopPosition, mAnimDirection);
+        if (mOnCardSwipeListener != null)
+            mOnCardSwipeListener.onAnimOutStart(getViewByPosition(mTopPosition), mTopPosition, mAnimDirection);
     }
 
     @Override
     public void onStartIn() {
         mAnimStatus = ANIMATION_IN;
-        mOnCardSwipeListener.onAnimInStart(getViewByPosition(mTopPosition), mTopPosition);
+        if (mOnCardSwipeListener != null)
+            mOnCardSwipeListener.onAnimInStart(getViewByPosition(mTopPosition), mTopPosition);
     }
 
     @Override
     public void onStopIn() {
-        mOnCardSwipeListener.onAnimInStop(getViewByPosition(mTopPosition), mTopPosition);
+        if (mOnCardSwipeListener != null)
+            mOnCardSwipeListener.onAnimInStop(getViewByPosition(mTopPosition), mTopPosition);
     }
 
     private View getViewByPosition(int position) {
