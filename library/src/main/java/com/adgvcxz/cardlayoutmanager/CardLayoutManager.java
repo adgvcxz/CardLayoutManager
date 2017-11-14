@@ -208,22 +208,6 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 int top = (getHeight() - height + paddingTop - paddingBottom) / 2;
                 int bottom = top + height;
 
-                switch (mTranxX) {
-                    case LEFT:
-                        left += mXInterval;
-                        break;
-                    case RIGHT:
-                        right -= mXInterval;
-                        break;
-                }
-                switch (mTranxY) {
-                    case TOP:
-                        top += mYInterval;
-                        break;
-                    case BOTTOM:
-                        bottom -= mYInterval;
-                        break;
-                }
                 layoutDecoratedWithMargins(child, left, top, right, bottom);
             } else {
                 attachView(child, 0);
@@ -560,18 +544,21 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
     public void onStartOut(int direction) {
         mAnimStatus = ANIMATION_OUT;
         mAnimDirection = direction;
-        mOnCardSwipeListener.onAnimOutStart(getViewByPosition(mTopPosition), mTopPosition, mAnimDirection);
+        if (mOnCardSwipeListener != null)
+            mOnCardSwipeListener.onAnimOutStart(getViewByPosition(mTopPosition), mTopPosition, mAnimDirection);
     }
 
     @Override
     public void onStartIn() {
         mAnimStatus = ANIMATION_IN;
-        mOnCardSwipeListener.onAnimInStart(getViewByPosition(mTopPosition), mTopPosition);
+        if (mOnCardSwipeListener != null)
+            mOnCardSwipeListener.onAnimInStart(getViewByPosition(mTopPosition), mTopPosition);
     }
 
     @Override
     public void onStopIn() {
-        mOnCardSwipeListener.onAnimInStop(getViewByPosition(mTopPosition), mTopPosition);
+        if (mOnCardSwipeListener != null)
+            mOnCardSwipeListener.onAnimInStop(getViewByPosition(mTopPosition), mTopPosition);
     }
 
     private View getViewByPosition(int position) {
