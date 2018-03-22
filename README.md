@@ -46,7 +46,7 @@ allprojects {
 }
 
 dependencies {
-    compile 'com.github.adgvcxz:cardlayoutmanager:0.2.0'
+    compile 'com.github.adgvcxz:cardlayoutmanager:0.2.1'
 }
 ```
 
