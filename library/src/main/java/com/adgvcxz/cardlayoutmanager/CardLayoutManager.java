@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -214,6 +215,7 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
                 attachView(child, 0);
                 mViewCaches.remove(i);
             }
+            fillChild(child, i, mDx, mDy);
             if (i == mTopPosition) {
                 proportion = layoutTopChild(child);
             } else {
@@ -265,6 +267,10 @@ public class CardLayoutManager extends RecyclerView.LayoutManager implements
             int position = getPosition(view);
             mViewCaches.put(position, view);
         }
+    }
+
+    protected void fillChild(View view, int position, int dx, int dy) {
+
     }
 
     public float getScale(int position) {

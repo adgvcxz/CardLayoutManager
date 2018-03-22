@@ -6,6 +6,8 @@
 * 支持``smoothScrollToPosition``和``scrollToPosition``
 * 自定义``LinearLayout.HORIZONTAL``或者``LinearLayout.VERTICAL``
 * 自定义显示卡片个数以及卡片之间的间隙
+* 自定义显示卡片的排列方向: ``LEFT`` ``RIGHT`` ``TOP`` ``BOTTOM``
+* 自定义滑动方向: ``setVerticalSwipe`` ``setHorizontalSwipe``
 * 对滑动过程进行控制
 * 简单易用，扩展性高
 
