@@ -17,6 +17,7 @@ public class CardSnapHelper extends SnapHelper implements View.OnTouchListener {
     private int mVelocityX;
     private int mVelocityY;
     private View.OnTouchListener mTouchListener;
+    private boolean mMove = false;
 
     @Override
     public void attachToRecyclerView(@Nullable RecyclerView recyclerView) throws IllegalStateException {
@@ -74,11 +75,15 @@ public class CardSnapHelper extends SnapHelper implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN || !mMove) {
+            mMove = true;
             if (((RecyclerView) view).getLayoutManager() instanceof CardLayoutManager) {
                 CardLayoutManager manager = (CardLayoutManager) ((RecyclerView) view).getLayoutManager();
                 manager.setDownPoint(view, (int) motionEvent.getX(), (int) motionEvent.getY());
             }
+        }
+        if (motionEvent.getAction() == MotionEvent.ACTION_UP || motionEvent.getAction() == MotionEvent.ACTION_CANCEL) {
+            mMove = false;
         }
         return mTouchListener != null && mTouchListener.onTouch(view, motionEvent);
     }
